@@ -1,0 +1,118 @@
+body {
+    font-family: Arial, sans-serif;
+    /* Couleur de fond sombre pour le corps */
+    background-color: #1b1b1b; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    color: #f0f0f0; /* Texte clair par défaut */
+}
+
+.container {
+    background-color: #131313; /* Conteneur légèrement plus clair que le fond */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Ombre plus visible sur fond sombre */
+    width: 90%;
+    max-width: 500px;
+}
+
+h1 {
+    text-align: center;
+    color: #ffffff; /* Couleur d'accentuation */
+    margin-bottom: 25px;
+}
+
+.input-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+#taskInput {
+    flex-grow: 1;
+    padding: 10px;
+    border: 2px solid #353535; /* Bordure foncée */
+    border-radius: 5px 0 0 5px;
+    font-size: 16px;
+    background-color: #333333; /* Fond de l'input */
+    color: #f0f0f0;
+}
+
+#addTaskButton {
+    padding: 10px 15px;
+    background-color: #585858; /* Couleur d'accentuation */
+    color: white;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#addTaskButton:hover {
+    background-color: #7a7a7a;
+}
+
+#taskList {
+    list-style: none;
+    padding: 0;
+}
+
+#taskList li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #181818; /* Séparateur subtil */
+    transition: background-color 0.2s;
+}
+
+#taskList li:last-child {
+    border-bottom: none;
+}
+
+.task-content {
+    display: flex; /* Permet d'aligner la checkbox, l'émoji et le texte */
+    align-items: center;
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.task-checkbox {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.task-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.task-text {
+    font-size: 16px;
+    color: #f0f0f0;
+}
+
+.completed .task-text {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.delete-button {
+    background-color: #c02727;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+    background-color: #c42d44;
+}
