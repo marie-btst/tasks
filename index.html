@@ -3,20 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ma Super To-Do List</title>
+    <title>Tâches</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Liste de tâches 📝</h1>
+        <h1>📝 Liste de tâches</h1>
 
         <div class="input-container">
-            <input type="text" id="taskInput" placeholder="Ajouter une nouvelle tâche...">
+            <input type="text" id="taskInput" placeholder="Ajouter une nouvelle tâche ...">
             <button id="addTaskButton">Ajouter</button>
         </div>
 
-        <ul id="taskList">
-            </ul>
+        <div class="task-stats">
+            <span id="taskCount">0 tâche</span>
+            <button id="clearAllButton" class="clear-all-button" style="display: none;">Tout supprimer</button>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">✨</div>
+            <p>Aucune tâche pour le moment</p>
+        </div>
+
+        <ul id="taskList"></ul>
     </div>
 
     <script src="script.js"></script>

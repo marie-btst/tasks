@@ -1,50 +1,76 @@
-// 1. Récupération des éléments du DOM
 const taskInput = document.getElementById('taskInput');
 const addTaskButton = document.getElementById('addTaskButton');
 const taskList = document.getElementById('taskList');
+const taskCount = document.getElementById('taskCount');
+const emptyState = document.getElementById('emptyState');
 
 const STORAGE_KEY = 'todoListTasks';
 
-// --- Nouvelles fonctions pour les Émojis ---
-
 /**
- * Tente d'associer un émoji au texte de la tâche.
- * @param {string} text - Le texte de la tâche.
- * @returns {string} L'émoji correspondant ou un émoji par défaut.
+ * Retourne l'emoji correspondant au texte de la tâche
+ * @param {string} text - Le texte de la tâche
+ * @returns {string} L'emoji correspondant
  */
 function getEmojiForTask(text) {
     const lowerText = text.toLowerCase();
     
-    // Vous pouvez ajouter autant de règles que vous voulez ici !
     if (lowerText.includes('coder') || lowerText.includes('code') || lowerText.includes('dev')) return '💻';
-    if (lowerText.includes('sport') || lowerText.includes('exercice') || lowerText.includes('courir')) return '🏃';
+    if (lowerText.includes('sport') || lowerText.includes('exercice') || lowerText.includes('courir') || lowerText.includes('courir')) return '🏃';
     if (lowerText.includes('manger') || lowerText.includes('courses') || lowerText.includes('cuisine')) return '🍔';
     if (lowerText.includes('dormir')) return '😴';
     if (lowerText.includes('livre') || lowerText.includes('lire')) return '📚';
     if (lowerText.includes('réunion') || lowerText.includes('email')) return '📧';
+    if (lowerText.includes('appel') || lowerText.includes('téléphone')) return '☎️';
+    if (lowerText.includes('achat') || lowerText.includes('shopping')) return '🛍️';
+    if (lowerText.includes('travail') || lowerText.includes('job')) return '💼';
     
-    // Émoji par défaut
     return '📌'; 
 }
 
-
-// --- Fonctions de Stockage Local (Identiques) ---
-
+/**
+ * Récupère les tâches du localStorage
+ * @returns {Array} Tableau des tâches
+ */
 function getTasks() {
     const tasksJSON = localStorage.getItem(STORAGE_KEY);
     return tasksJSON ? JSON.parse(tasksJSON) : [];
 }
 
+/**
+ * Sauvegarde les tâches dans le localStorage
+ * @param {Array} tasks - Tableau des tâches à sauvegarder
+ */
 function saveTasks(tasks) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
-// --- Fonctions de Gestion des Tâches (Mises à jour) ---
+/**
+ * Met à jour le compteur de tâches
+ */
+function updateTaskCount() {
+    const tasks = getTasks();
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    const clearAllButton = document.getElementById('clearAllButton');
+    
+    if (total === 0) {
+        taskCount.textContent = '0 tâche';
+        emptyState.style.display = 'block';
+        taskList.style.display = 'none';
+        clearAllButton.style.display = 'none';
+    } else {
+        const remaining = total - completed;
+        taskCount.textContent = `${remaining}/${total} tâche${total > 1 ? 's' : ''}`;
+        emptyState.style.display = 'none';
+        taskList.style.display = 'block';
+        clearAllButton.style.display = 'inline-block';
+    }
+}
 
 /**
- * Crée un élément <li> pour une tâche donnée, incluant la checkbox et l'émoji.
- * @param {Object} task - L'objet tâche {text: string, completed: boolean}.
- * @returns {HTMLLIElement} L'élément <li> créé.
+ * Crée un élément <li> pour une tâche
+ * @param {Object} task - L'objet tâche {text: string, completed: boolean}
+ * @returns {HTMLLIElement} L'élément <li> créé
  */
 function createTaskElement(task) {
     const li = document.createElement('li');
@@ -52,63 +78,55 @@ function createTaskElement(task) {
         li.classList.add('completed');
     }
     
-    // --- Conteneur de contenu (Checkbox, Émoji, Texte) ---
     const taskContent = document.createElement('div');
     taskContent.classList.add('task-content');
 
-    // 1. Création de la Checkbox (Input type checkbox)
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.checked = task.completed;
     checkbox.classList.add('task-checkbox');
-
-    // Événement pour basculer l'état au clic sur la checkbox
     checkbox.addEventListener('change', () => {
         toggleTaskCompletion(task.text);
     });
     
-    // 2. Création de l'Émoji
     const taskIcon = document.createElement('span');
     taskIcon.classList.add('task-icon');
-    // Utilisation de la nouvelle fonction pour obtenir l'émoji
     taskIcon.textContent = getEmojiForTask(task.text); 
 
-    // 3. Création du Texte de la tâche
     const taskText = document.createElement('span');
     taskText.classList.add('task-text');
     taskText.textContent = task.text;
 
-    // Événement pour basculer l'état au clic sur le texte (comme avant)
     taskContent.addEventListener('click', (event) => {
-        // Assurez-vous que le clic n'est pas sur le bouton Supprimer
         if (!event.target.classList.contains('delete-button')) {
             toggleTaskCompletion(task.text);
         }
     });
 
-    // Assemblage du contenu
     taskContent.appendChild(checkbox);
     taskContent.appendChild(taskIcon);
     taskContent.appendChild(taskText);
 
-    // --- Bouton de Suppression (Identique) ---
+    const taskActions = document.createElement('div');
+    taskActions.classList.add('task-actions');
+
     const deleteButton = document.createElement('button');
     deleteButton.classList.add('delete-button');
     deleteButton.textContent = 'Supprimer';
-
     deleteButton.addEventListener('click', () => {
         deleteTask(task.text);
     });
 
-    // Assemblage final de l'élément <li>
+    taskActions.appendChild(deleteButton);
+
     li.appendChild(taskContent);
-    li.appendChild(deleteButton);
+    li.appendChild(taskActions);
 
     return li;
 }
 
 /**
- * Affiche toutes les tâches actuelles dans le DOM. (Identique)
+ * Affiche toutes les tâches actuelles dans le DOM
  */
 function renderTasks() {
     taskList.innerHTML = '';
@@ -118,37 +136,38 @@ function renderTasks() {
         const li = createTaskElement(task);
         taskList.appendChild(li);
     });
+    
+    updateTaskCount();
 }
 
 /**
- * Ajoute une nouvelle tâche. (Identique)
+ * Ajoute une nouvelle tâche
  */
 function addTask() {
     const text = taskInput.value.trim();
 
     if (text === '') {
-        alert('Veuillez entrer une tâche !');
+        taskInput.focus();
         return;
     }
 
     const tasks = getTasks();
     
-    // Vérifie si la tâche existe déjà (pour ne pas avoir de doublons pour la clé de suppression)
     if (tasks.some(task => task.text === text)) {
         alert('Cette tâche existe déjà.');
         return;
     }
     
     tasks.push({ text: text, completed: false });
-    
     saveTasks(tasks);
     renderTasks();
-    
     taskInput.value = '';
+    taskInput.focus();
 }
 
 /**
- * Supprime une tâche. (Identique)
+ * Supprime une tâche
+ * @param {string} text - Le texte de la tâche à supprimer
  */
 function deleteTask(text) {
     let tasks = getTasks();
@@ -158,28 +177,38 @@ function deleteTask(text) {
 }
 
 /**
- * Bascule l'état "terminée" d'une tâche. (Identique)
+ * Bascule l'état "complétée" d'une tâche
+ * @param {string} text - Le texte de la tâche
  */
 function toggleTaskCompletion(text) {
     const tasks = getTasks();
-    
     const taskIndex = tasks.findIndex(task => task.text === text);
     if (taskIndex !== -1) {
         tasks[taskIndex].completed = !tasks[taskIndex].completed;
         saveTasks(tasks);
-        renderTasks(); // IMPORTANT : Re-render pour mettre à jour la classe CSS
+        renderTasks();
     }
 }
 
+/**
+ * Supprime toutes les tâches après confirmation
+ */
+function clearAllTasks() {
+    if (confirm('Êtes-vous sûr de vouloir supprimer toutes les tâches ?')) {
+        saveTasks([]);
+        renderTasks();
+    }
+}
 
-// --- Écouteurs d'Événements et Initialisation (Identiques) ---
-
+// Écouteurs d'événements
+const clearAllButton = document.getElementById('clearAllButton');
 addTaskButton.addEventListener('click', addTask);
-
+clearAllButton.addEventListener('click', clearAllTasks);
 taskInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         addTask();
     }
 });
 
+// Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', renderTasks);
