@@ -7,27 +7,6 @@ const emptyState = document.getElementById('emptyState');
 const STORAGE_KEY = 'todoListTasks';
 
 /**
- * Retourne l'emoji correspondant au texte de la tâche
- * @param {string} text - Le texte de la tâche
- * @returns {string} L'emoji correspondant
- */
-function getEmojiForTask(text) {
-    const lowerText = text.toLowerCase();
-    
-    if (lowerText.includes('coder') || lowerText.includes('code') || lowerText.includes('dev')) return '💻';
-    if (lowerText.includes('sport') || lowerText.includes('exercice') || lowerText.includes('courir') || lowerText.includes('courir')) return '🏃';
-    if (lowerText.includes('manger') || lowerText.includes('courses') || lowerText.includes('cuisine')) return '🍔';
-    if (lowerText.includes('dormir')) return '😴';
-    if (lowerText.includes('livre') || lowerText.includes('lire')) return '📚';
-    if (lowerText.includes('réunion') || lowerText.includes('email')) return '📧';
-    if (lowerText.includes('appel') || lowerText.includes('téléphone')) return '☎️';
-    if (lowerText.includes('achat') || lowerText.includes('shopping')) return '🛍️';
-    if (lowerText.includes('travail') || lowerText.includes('job')) return '💼';
-    
-    return '📌'; 
-}
-
-/**
  * Récupère les tâches du localStorage
  * @returns {Array} Tableau des tâches
  */
@@ -45,6 +24,44 @@ function saveTasks(tasks) {
 }
 
 /**
+ * Crée des confettis animés
+ */
+function createConfetti() {
+    const colors = ['confetti-blue', 'confetti-cyan', 'confetti-purple'];
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti', colors[Math.floor(Math.random() * colors.length)]);
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.delay = Math.random() * 0.5 + 's';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 3500);
+    }
+}
+
+/**
+ * Affiche l'animation de victoire
+ */
+function showVictoryAnimation() {
+    const victoryContainer = document.createElement('div');
+    victoryContainer.classList.add('victory-container');
+    victoryContainer.innerHTML = `
+        <div class="victory-message">
+            <span class="victory-emoji">🎉</span>
+            Félicitation ! Tu as réalisé tout ce que tu avais à faire !
+            <span class="victory-emoji">🚀</span>
+        </div>
+    `;
+    
+    document.body.appendChild(victoryContainer);
+    createConfetti();
+    
+    setTimeout(() => {
+        victoryContainer.remove();
+    }, 4000);
+}
+
+/**
  * Met à jour le compteur de tâches
  */
 function updateTaskCount() {
@@ -54,13 +71,19 @@ function updateTaskCount() {
     const clearAllButton = document.getElementById('clearAllButton');
     
     if (total === 0) {
-        taskCount.textContent = '0 tâche';
+        taskCount.textContent = '0/0 tâche réalisée';
         emptyState.style.display = 'block';
         taskList.style.display = 'none';
         clearAllButton.style.display = 'none';
+    } else if (completed === total) {
+        taskCount.innerHTML = '<span style="animation: bounce 0.8s infinite;">🎯 Toutes les tâches ont été réalisées !</span>';
+        emptyState.style.display = 'none';
+        taskList.style.display = 'block';
+        clearAllButton.style.display = 'inline-block';
+        showVictoryAnimation();
     } else {
-        const remaining = total - completed;
-        taskCount.textContent = `${remaining}/${total} tâche${total > 1 ? 's' : ''}`;
+        const pluriel = completed > 1 ? 's réalisées' : ' réalisée';
+        taskCount.textContent = `${completed}/${total} tâche${pluriel}`;
         emptyState.style.display = 'none';
         taskList.style.display = 'block';
         clearAllButton.style.display = 'inline-block';
@@ -88,10 +111,6 @@ function createTaskElement(task) {
     checkbox.addEventListener('change', () => {
         toggleTaskCompletion(task.text);
     });
-    
-    const taskIcon = document.createElement('span');
-    taskIcon.classList.add('task-icon');
-    taskIcon.textContent = getEmojiForTask(task.text); 
 
     const taskText = document.createElement('span');
     taskText.classList.add('task-text');
@@ -104,7 +123,6 @@ function createTaskElement(task) {
     });
 
     taskContent.appendChild(checkbox);
-    taskContent.appendChild(taskIcon);
     taskContent.appendChild(taskText);
 
     const taskActions = document.createElement('div');
