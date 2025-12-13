@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tâches</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" href="images/logo.ico">
 </head>
 <body>
@@ -12,13 +14,13 @@
         <h1>📝 Liste de tâches</h1>
 
         <div class="input-container">
-            <input type="text" id="taskInput" placeholder="Ajouter une nouvelle tâche ...">
-            <button id="addTaskButton">Ajouter</button>
+            <input type="text" id="taskInput" placeholder="Ajouter une nouvelle tâche...">
+            <button id="addTaskButton">+</button>
         </div>
 
         <div class="task-stats">
             <span id="taskCount">0/0 tâches</span>
-            <button id="clearAllButton" class="clear-all-button" style="display: none;">Tout supprimer</button>
+            <button id="clearAllButton" class="clear-all-button" style="display: none;">🗑️ Tout supprimer</button>
         </div>
 
         <div id="emptyState" class="empty-state" style="display: none;">
@@ -28,6 +30,17 @@
 
         <ul id="taskList"></ul>
     </div>
+
+    <footer>
+        <h2>Github</h2>
+        <div class="social-links">
+            <p>
+                <a href="https://github.com/marie-btst" target="_blank">
+                    <i class="fa-brands fa-github"></i> marie-btst
+                </a>
+            </p>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>

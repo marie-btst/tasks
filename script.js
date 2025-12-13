@@ -6,50 +6,38 @@ const emptyState = document.getElementById('emptyState');
 
 const STORAGE_KEY = 'todoListTasks';
 
-/**
- * Récupère les tâches du localStorage
- * @returns {Array} Tableau des tâches
- */
 function getTasks() {
     const tasksJSON = localStorage.getItem(STORAGE_KEY);
     return tasksJSON ? JSON.parse(tasksJSON) : [];
 }
 
-/**
- * Sauvegarde les tâches dans le localStorage
- * @param {Array} tasks - Tableau des tâches à sauvegarder
- */
 function saveTasks(tasks) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
-/**
- * Crée des confettis animés
- */
 function createConfetti() {
-    const colors = ['confetti-blue', 'confetti-cyan', 'confetti-purple'];
+    const colors = ['confetti-green', 'confetti-orange', 'confetti-yellow'];
     for (let i = 0; i < 50; i++) {
         const confetti = document.createElement('div');
         confetti.classList.add('confetti', colors[Math.floor(Math.random() * colors.length)]);
         confetti.style.left = Math.random() * 100 + '%';
-        confetti.style.delay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = (Math.random() * 1.5 + 4.5) + 's';
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
         document.body.appendChild(confetti);
-        
-        setTimeout(() => confetti.remove(), 3500);
+
+        setTimeout(() => confetti.remove(), 6000);
     }
 }
 
-/**
- * Affiche l'animation de victoire
- */
 function showVictoryAnimation() {
     const victoryContainer = document.createElement('div');
     victoryContainer.classList.add('victory-container');
     victoryContainer.innerHTML = `
         <div class="victory-message">
-            <span class="victory-emoji">🎉</span>
-            Félicitation ! Tu as réalisé tout ce que tu avais à faire !
-            <span class="victory-emoji">🚀</span>
+            <span class="victory-emoji">✅</span>
+            <br>
+            Félicitation, <br>
+            tu as réalisé tout ce que tu avais à faire !
         </div>
     `;
     
@@ -58,12 +46,9 @@ function showVictoryAnimation() {
     
     setTimeout(() => {
         victoryContainer.remove();
-    }, 4000);
+    }, 3000);
 }
 
-/**
- * Met à jour le compteur de tâches
- */
 function updateTaskCount() {
     const tasks = getTasks();
     const total = tasks.length;
@@ -76,7 +61,7 @@ function updateTaskCount() {
         taskList.style.display = 'none';
         clearAllButton.style.display = 'none';
     } else if (completed === total) {
-        taskCount.innerHTML = '<span style="animation: bounce 0.8s infinite;">🎯 Toutes les tâches ont été réalisées !</span>';
+        taskCount.innerHTML = '<span style="animation: bounce 0.8s infinite;">📈 Toutes les tâches ont été réalisées !</span>';
         emptyState.style.display = 'none';
         taskList.style.display = 'block';
         clearAllButton.style.display = 'inline-block';
@@ -90,11 +75,6 @@ function updateTaskCount() {
     }
 }
 
-/**
- * Crée un élément <li> pour une tâche
- * @param {Object} task - L'objet tâche {text: string, completed: boolean}
- * @returns {HTMLLIElement} L'élément <li> créé
- */
 function createTaskElement(task) {
     const li = document.createElement('li');
     if (task.completed) {
@@ -143,9 +123,6 @@ function createTaskElement(task) {
     return li;
 }
 
-/**
- * Affiche toutes les tâches actuelles dans le DOM
- */
 function renderTasks() {
     taskList.innerHTML = '';
     const tasks = getTasks();
@@ -158,9 +135,6 @@ function renderTasks() {
     updateTaskCount();
 }
 
-/**
- * Ajoute une nouvelle tâche
- */
 function addTask() {
     const text = taskInput.value.trim();
 
@@ -183,10 +157,6 @@ function addTask() {
     taskInput.focus();
 }
 
-/**
- * Supprime une tâche
- * @param {string} text - Le texte de la tâche à supprimer
- */
 function deleteTask(text) {
     let tasks = getTasks();
     tasks = tasks.filter(task => task.text !== text);
@@ -194,10 +164,6 @@ function deleteTask(text) {
     renderTasks();
 }
 
-/**
- * Bascule l'état "complétée" d'une tâche
- * @param {string} text - Le texte de la tâche
- */
 function toggleTaskCompletion(text) {
     const tasks = getTasks();
     const taskIndex = tasks.findIndex(task => task.text === text);
@@ -208,9 +174,6 @@ function toggleTaskCompletion(text) {
     }
 }
 
-/**
- * Supprime toutes les tâches après confirmation
- */
 function clearAllTasks() {
     if (confirm('Êtes-vous sûr de vouloir supprimer toutes les tâches ?')) {
         saveTasks([]);
@@ -218,7 +181,6 @@ function clearAllTasks() {
     }
 }
 
-// Écouteurs d'événements
 const clearAllButton = document.getElementById('clearAllButton');
 addTaskButton.addEventListener('click', addTask);
 clearAllButton.addEventListener('click', clearAllTasks);
@@ -228,5 +190,4 @@ taskInput.addEventListener('keypress', (event) => {
     }
 });
 
-// Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', renderTasks);

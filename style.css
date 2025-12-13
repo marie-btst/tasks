@@ -5,13 +5,13 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #021235;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #ffffff;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     padding: 0;
-    color: #e0e7ff;
+    color: #1a1a1a;
 }
 
 .container {
@@ -29,11 +29,12 @@ body {
 
 h1 {
     text-align: center;
-    color: #60a5fa;
+    color: #2a2a2a;
     margin-bottom: 30px;
     font-size: 2em;
     letter-spacing: 1px;
     margin-top: 20px;
+    animation: fadeInDown 1s ease-out;
 }
 
 .input-container {
@@ -44,33 +45,34 @@ h1 {
     margin-left: auto;
     margin-right: auto;
     width: 100%;
+    animation: fadeInUp 1s ease-out 0.2s both;
 }
 
 #taskInput {
     flex-grow: 1;
     padding: 12px 16px;
-    border: 2px solid #1e3a8a;
+    border: 2px solid #e0e0e0;
     border-radius: 8px;
     font-size: 16px;
-    background-color: #0a1929;
-    color: #e0e7ff;
+    background-color: #ffffff;
+    color: #1a1a1a;
     transition: all 0.3s ease;
 }
 
 #taskInput:focus {
     outline: none;
-    border-color: #60a5fa;
-    background-color: #1a2a4a;
-    box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+    border-color: #2a2a2a;
+    background-color: #fff8f5;
+    box-shadow: 0 0 10px rgba(42, 42, 42, 0.3);
 }
 
 #taskInput::placeholder {
-    color: #4b5563;
+    color: #999999;
 }
 
 #addTaskButton {
     padding: 12px 28px;
-    background: #5dade2;
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -78,12 +80,27 @@ h1 {
     font-size: 16px;
     font-weight: 600;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(93, 173, 226, 0.4);
+    box-shadow: 0 4px 15px rgba(42, 42, 42, 0.4), 0 0 20px rgba(42, 42, 42, 0.2);
+    position: relative;
+    overflow: hidden;
+    animation: shimmer 3s infinite;
+}
+
+#addTaskButton::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    animation: shine 3s infinite;
 }
 
 #addTaskButton:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(93, 173, 226, 0.6);
+    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+    box-shadow: 0 6px 25px rgba(42, 42, 42, 0.6), 0 0 30px rgba(42, 42, 42, 0.3);
 }
 
 #addTaskButton:active {
@@ -94,7 +111,7 @@ h1 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 14px;
-    color: #60a5fa;
+    color: #2a2a2a;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -107,7 +124,7 @@ h1 {
 
 .clear-all-button {
     padding: 8px 16px;
-    background: #5dade2;
+    background: linear-gradient(135deg, #292929 0%, #575757 100%);
     color: white;
     border: none;
     border-radius: 6px;
@@ -115,11 +132,26 @@ h1 {
     font-size: 13px;
     font-weight: 600;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: shimmer 3s infinite;
+}
+
+.clear-all-button::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    animation: shine 3s infinite;
 }
 
 .clear-all-button:hover {
-    background: #85c1e2;
+    background: linear-gradient(135deg, #363636 0%, #1f1f1f 100%);
     transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(42, 42, 42, 0.5);
 }
 
 #taskList {
@@ -132,21 +164,22 @@ h1 {
     align-items: center;
     padding: 16px;
     margin-bottom: 10px;
-    background-color: #1a2a4a;
-    border-left: 4px solid #3b82f6;
+    background-color: #f5f5f5;
+    border-left: 4px solid #116e0e;
     border-radius: 8px;
     transition: all 0.3s ease;
 }
 
 #taskList li:hover {
-    background-color: #213555;
-    border-left-color: #60a5fa;
+    background-color: #efefef;
+    border-left-color: #116e0e;
     transform: translateX(5px);
 }
 
 #taskList li.completed {
-    opacity: 0.6;
-    border-left-color: #1e3a8a;
+    opacity: 0.8;
+    border-left-color: #116e0e;
+    background-color: #f0fdf4;
 }
 
 .task-content {
@@ -161,18 +194,18 @@ h1 {
     width: 22px;
     height: 22px;
     cursor: pointer;
-    accent-color: #3b82f6;
+    accent-color: #116e0e;
 }
 
 .task-text {
     font-size: 16px;
-    color: #e0e7ff;
+    color: #1a1a1a;
     word-break: break-word;
 }
 
 .completed .task-text {
     text-decoration: line-through;
-    color: #4b5563;
+    color: #116e0e;
 }
 
 .task-actions {
@@ -181,7 +214,7 @@ h1 {
 }
 
 .delete-button {
-    background: #5dade2;
+    background: #a50404;
     color: white;
     border: none;
     padding: 8px 14px;
@@ -192,14 +225,14 @@ h1 {
 }
 
 .delete-button:hover {
-    background: #85c1e2;
+    background: #7a0303;
     transform: scale(1.05);
 }
 
 .empty-state {
     text-align: center;
     padding: 40px 20px;
-    color: #4b5563;
+    color: #999999;
 }
 
 .empty-state-icon {
@@ -207,7 +240,6 @@ h1 {
     margin-bottom: 10px;
 }
 
-/* Animation de victoire */
 .victory-container {
     position: fixed;
     top: 0;
@@ -220,22 +252,27 @@ h1 {
     align-items: center;
     pointer-events: none;
     z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    animation: fadeOut 0.8s ease-in-out 2.2s forwards;
 }
 
 .victory-message {
-    font-size: 3em;
+    font-size: 2.5em;
     font-weight: bold;
-    color: #60a5fa;
+    color: #1a1a1a;
     text-align: center;
     animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    text-shadow: 0 0 20px rgba(96, 165, 250, 0.8);
+    text-shadow: 0 0 30px rgba(17, 110, 14, 0.4);
     margin-bottom: 20px;
+    line-height: 1.4;
+    letter-spacing: 1px;
 }
 
 .victory-emoji {
-    font-size: 4em;
+    font-size: 2.5em;
     animation: bounce 0.8s infinite;
-    margin: 0 10px;
+    margin: 0 15px;
+    display: inline-block;
 }
 
 @keyframes popIn {
@@ -261,7 +298,15 @@ h1 {
     }
 }
 
-/* Confettis */
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
 .confetti {
     position: fixed;
     width: 10px;
@@ -281,28 +326,134 @@ h1 {
     }
 }
 
-.confetti-blue {
-    background: #60a5fa;
-    animation: fall 3s linear forwards, sway 2s ease-in-out infinite;
+.confetti.extended {
+    animation: fall 6s linear forwards !important;
 }
 
-.confetti-cyan {
-    background: #5dade2;
-    animation: fall 3.5s linear forwards, sway 2.5s ease-in-out infinite;
+@keyframes shine {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
 }
 
-.confetti-purple {
-    background: #a78bfa;
-    animation: fall 3.2s linear forwards, sway 2.2s ease-in-out infinite;
-}
-
-@keyframes sway {
+@keyframes shimmer {
     0%, 100% {
-        transform: translateX(0);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0);
     }
     50% {
-        transform: translateX(100px);
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
     }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(17, 110, 14, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(17, 110, 14, 0);
+    }
+}
+
+.confetti-green {
+    background: #116e0e;
+}
+
+.confetti-orange {
+    background: #ff6b35;
+}
+
+.confetti-yellow {
+    background: #f1c40f;
+}
+
+footer {
+    background-color: #f9f9f9;
+    color: #414141;
+    text-align: center;
+    padding: 30px 15px;
+    margin-top: 40px;
+    animation: fadeInUp 1s ease-out 0.4s both;
+    border-top: 2px solid #e0e0e0;
+}
+
+footer h2 {
+    color: #2a2a2a;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+    font-family: 'Poppins', sans-serif;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.social-links p {
+    margin: 0;
+    padding: 0;
+}
+
+.social-links a {
+    color: #1a1a1a;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    animation: fadeInUp 1s ease-out 0.5s both;
+    font-family: 'Poppins', sans-serif;
+}
+
+.social-links a:hover {
+    color: #2a2a2a;
+    transform: translateY(-3px);
+    text-shadow: 0 0 10px rgba(42, 42, 42, 0.4);
+}
+
+.social-links i {
+    font-size: 1.5em;
+    display: inline-block;
 }
 
 @media (max-width: 480px) {
@@ -337,10 +488,10 @@ h1 {
     }
 
     .victory-message {
-        font-size: 2em;
+        font-size: 1.8em;
     }
 
     .victory-emoji {
-        font-size: 3em;
+        font-size: 2em;
     }
 }
