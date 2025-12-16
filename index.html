@@ -3,45 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Application de gestion de tâches simple et efficace">
     <title>Tâches</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="icon" href="images/logo.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 0;
+            color: #1a1a1a;
+        }
+
+        .container {
+            background-color: transparent;
+            padding: 40px;
+            width: 100%;
+            max-width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2a2a2a;
+            margin-bottom: 30px;
+            font-size: 2em;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            max-width: 550px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            animation: fadeInUp 0.6s ease-out 0.1s both;
+        }
+
+        #taskInput {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #ffffff;
+            color: #1a1a1a;
+            transition: all 0.2s ease;
+        }
+
+        #taskInput:focus {
+            outline: none;
+            border-color: #2a2a2a;
+            background-color: #fff8f5;
+            box-shadow: 0 0 10px rgba(42, 42, 42, 0.3);
+        }
+
+        #taskInput::placeholder {
+            color: #999999;
+        }
+
+        #addTaskButton {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(42, 42, 42, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #addTaskButton::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shine 3s infinite;
+        }
+
+        #addTaskButton:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            box-shadow: 0 6px 25px rgba(42, 42, 42, 0.6);
+        }
+
+        #addTaskButton:active {
+            transform: translateY(0);
+        }
+
+        .task-stats {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #2a2a2a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            max-width: 550px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        .clear-all-button {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #292929 0%, #575757 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .clear-all-button:hover {
+            background: linear-gradient(135deg, #363636 0%, #1f1f1f 100%);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(42, 42, 42, 0.5);
+        }
+
+        #taskList {
+            list-style: none;
+        }
+
+        #taskList li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            margin-bottom: 10px;
+            background-color: #f5f5f5;
+            border-left: 4px solid #116e0e;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        #taskList li:hover {
+            background-color: #efefef;
+            transform: translateX(5px);
+        }
+
+        #taskList li.completed {
+            opacity: 0.8;
+            background-color: #f0fdf4;
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            cursor: pointer;
+            gap: 12px;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #116e0e;
+        }
+
+        .task-text {
+            font-size: 16px;
+            color: #1a1a1a;
+            word-break: break-word;
+        }
+
+        .completed .task-text {
+            text-decoration: line-through;
+            color: #116e0e;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete-button {
+            background: #a50404;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .delete-button:hover {
+            background: #7a0303;
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999999;
+            display: none;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .victory-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            animation: fadeOut 0.8s ease-in-out 2.2s forwards;
+        }
+
+        .victory-message {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #1a1a1a;
+            text-align: center;
+            animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-shadow: 0 0 30px rgba(17, 110, 14, 0.4);
+            line-height: 1.4;
+            letter-spacing: 1px;
+        }
+
+        .victory-emoji {
+            font-size: 2.5em;
+            animation: bounce 0.8s infinite;
+            display: inline-block;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        .confetti-green { background: #116e0e; }
+        .confetti-orange { background: #ff6b35; }
+        .confetti-yellow { background: #f1c40f; }
+
+        footer {
+            background-color: #f9f9f9;
+            color: #414141;
+            text-align: center;
+            padding: 30px 15px;
+            margin-top: 40px;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        footer h2 {
+            color: #2a2a2a;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .social-links a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .social-links a:hover {
+            color: #2a2a2a;
+            transform: translateY(-3px);
+        }
+
+        .social-links i {
+            font-size: 1.5em;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes shine {
+            to { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 25px; }
+            h1 { font-size: 1.5em; margin-bottom: 20px; }
+            .input-container { flex-direction: column; }
+            #taskInput, #addTaskButton { width: 100%; }
+            #taskList li { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .task-actions { width: 100%; justify-content: flex-end; }
+            .victory-message { font-size: 1.8em; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>📝 Liste de tâches</h1>
 
         <div class="input-container">
-            <input type="text" id="taskInput" placeholder="Ajouter une nouvelle tâche...">
-            <button id="addTaskButton">+</button>
+            <input type="text" id="taskInput" placeholder="Ajouter une nouvelle tâche..." aria-label="Nouvelle tâche">
+            <button id="addTaskButton" aria-label="Ajouter la tâche">+</button>
         </div>
 
         <div class="task-stats">
-            <span id="taskCount">0/0 tâches</span>
-            <button id="clearAllButton" class="clear-all-button" style="display: none;">🗑️ Tout supprimer</button>
+            <span id="taskCount" role="status" aria-live="polite">0/0 tâches</span>
+            <button id="clearAllButton" class="clear-all-button" style="display: none;" aria-label="Supprimer toutes les tâches">🗑️ Tout supprimer</button>
         </div>
 
-        <div id="emptyState" class="empty-state" style="display: none;">
+        <div id="emptyState" class="empty-state">
             <div class="empty-state-icon">✨</div>
             <p>Aucune tâche pour le moment...</p>
         </div>
 
-        <ul id="taskList"></ul>
+        <ul id="taskList" role="list"></ul>
     </div>
 
     <footer>
         <h2>Github</h2>
         <div class="social-links">
             <p>
-                <a href="https://github.com/marie-btst" target="_blank">
-                    <i class="fa-brands fa-github"></i> marie-btst
+                <a href="https://github.com/marie-btst" target="_blank" rel="noopener noreferrer">
+                    <i class="fa-brands fa-github" aria-hidden="true"></i> marie-btst
                 </a>
             </p>
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        const taskInput = document.getElementById('taskInput');
+        const addTaskButton = document.getElementById('addTaskButton');
+        const taskList = document.getElementById('taskList');
+        const taskCount = document.getElementById('taskCount');
+        const emptyState = document.getElementById('emptyState');
+        const clearAllButton = document.getElementById('clearAllButton');
+
+        const STORAGE_KEY = 'todoListTasks';
+        let tasks = [];
+        let hasShownVictory = false;
+
+        function getTasks() {
+            try {
+                const tasksJSON = localStorage.getItem(STORAGE_KEY);
+                return tasksJSON ? JSON.parse(tasksJSON) : [];
+            } catch (e) {
+                console.error('Erreur de lecture du stockage:', e);
+                return [];
+            }
+        }
+
+        function saveTasks(newTasks) {
+            try {
+                tasks = newTasks;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+            } catch (e) {
+                console.error('Erreur de sauvegarde:', e);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['confetti-green', 'confetti-orange', 'confetti-yellow'];
+            const fragment = document.createDocumentFragment();
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = `confetti ${colors[Math.floor(Math.random() * colors.length)]}`;
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.animationDuration = (Math.random() * 1.5 + 4.5) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                fragment.appendChild(confetti);
+            }
+            
+            document.body.appendChild(fragment);
+            setTimeout(() => {
+                document.querySelectorAll('.confetti').forEach(c => c.remove());
+            }, 6000);
+        }
+
+        function showVictoryAnimation() {
+            if (hasShownVictory) return;
+            hasShownVictory = true;
+
+            const victoryContainer = document.createElement('div');
+            victoryContainer.className = 'victory-container';
+            victoryContainer.innerHTML = `
+                <div class="victory-message">
+                    <span class="victory-emoji">✅</span>
+                    <br>
+                    Félicitation, <br>
+                    tu as réalisé tout ce que tu avais à faire !
+                </div>
+            `;
+            
+            document.body.appendChild(victoryContainer);
+            createConfetti();
+            
+            setTimeout(() => {
+                victoryContainer.remove();
+                hasShownVictory = false;
+            }, 3000);
+        }
+
+        function updateTaskCount() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            
+            if (total === 0) {
+                taskCount.textContent = '0/0 tâche réalisée';
+                emptyState.style.display = 'block';
+                taskList.style.display = 'none';
+                clearAllButton.style.display = 'none';
+            } else if (completed === total) {
+                taskCount.innerHTML = '<span style="animation: bounce 0.8s infinite;">📈 Toutes les tâches ont été réalisées !</span>';
+                emptyState.style.display = 'none';
+                taskList.style.display = 'block';
+                clearAllButton.style.display = 'inline-block';
+                showVictoryAnimation();
+            } else {
+                const pluriel = completed > 1 ? 's réalisées' : ' réalisée';
+                taskCount.textContent = `${completed}/${total} tâche${pluriel}`;
+                emptyState.style.display = 'none';
+                taskList.style.display = 'block';
+                clearAllButton.style.display = 'inline-block';
+            }
+        }
+
+        function createTaskElement(task, index) {
+            const li = document.createElement('li');
+            li.role = 'listitem';
+            if (task.completed) li.classList.add('completed');
+            
+            const taskContent = document.createElement('div');
+            taskContent.className = 'task-content';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = task.completed;
+            checkbox.className = 'task-checkbox';
+            checkbox.id = `task-${index}`;
+            checkbox.setAttribute('aria-label', `Marquer "${task.text}" comme ${task.completed ? 'non terminée' : 'terminée'}`);
+            checkbox.addEventListener('change', () => toggleTaskCompletion(index));
+
+            const taskText = document.createElement('label');
+            taskText.className = 'task-text';
+            taskText.htmlFor = `task-${index}`;
+            taskText.textContent = task.text;
+
+            taskContent.appendChild(checkbox);
+            taskContent.appendChild(taskText);
+
+            const taskActions = document.createElement('div');
+            taskActions.className = 'task-actions';
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-button';
+            deleteButton.textContent = 'Supprimer';
+            deleteButton.setAttribute('aria-label', `Supprimer la tâche "${task.text}"`);
+            deleteButton.addEventListener('click', () => deleteTask(index));
+
+            taskActions.appendChild(deleteButton);
+            li.appendChild(taskContent);
+            li.appendChild(taskActions);
+
+            return li;
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            const fragment = document.createDocumentFragment();
+            
+            tasks.forEach((task, index) => {
+                fragment.appendChild(createTaskElement(task, index));
+            });
+            
+            taskList.appendChild(fragment);
+            updateTaskCount();
+        }
+
+        function addTask() {
+            const text = taskInput.value.trim();
+
+            if (!text) {
+                taskInput.focus();
+                return;
+            }
+            
+            if (tasks.some(task => task.text === text)) {
+                alert('Cette tâche existe déjà.');
+                return;
+            }
+            
+            saveTasks([...tasks, { text, completed: false }]);
+            renderTasks();
+            taskInput.value = '';
+            taskInput.focus();
+        }
+
+        function deleteTask(index) {
+            saveTasks(tasks.filter((_, i) => i !== index));
+            renderTasks();
+        }
+
+        function toggleTaskCompletion(index) {
+            const newTasks = [...tasks];
+            newTasks[index].completed = !newTasks[index].completed;
+            saveTasks(newTasks);
+            renderTasks();
+        }
+
+        function clearAllTasks() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer toutes les tâches ?')) {
+                saveTasks([]);
+                renderTasks();
+            }
+        }
+
+        addTaskButton.addEventListener('click', addTask);
+        clearAllButton.addEventListener('click', clearAllTasks);
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        tasks = getTasks();
+        renderTasks();
+    </script>
 </body>
 </html>
