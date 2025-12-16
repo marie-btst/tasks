@@ -405,8 +405,9 @@
         const clearAllButton = document.getElementById('clearAllButton');
 
         const STORAGE_KEY = 'todoListTasks';
+        const VICTORY_KEY = 'todoListVictoryShown';
         let tasks = [];
-        let hasShownVictory = false;
+        let victoryShownForState = localStorage.getItem(VICTORY_KEY) || '';
 
         function getTasks() {
             try {
@@ -422,6 +423,9 @@
             try {
                 tasks = newTasks;
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+                // Réinitialiser le flag de victoire quand les tâches changent
+                localStorage.removeItem(VICTORY_KEY);
+                victoryShownForState = '';
             } catch (e) {
                 console.error('Erreur de sauvegarde:', e);
             }
@@ -447,8 +451,14 @@
         }
 
         function showVictoryAnimation() {
-            if (hasShownVictory) return;
-            hasShownVictory = true;
+            // Créer une signature unique de l'état actuel (liste des tâches)
+            const currentState = tasks.map(t => t.text).sort().join('|');
+            
+            // Ne montrer l'animation que si on n'a pas déjà montré pour cet état
+            if (victoryShownForState === currentState) return;
+            
+            victoryShownForState = currentState;
+            localStorage.setItem(VICTORY_KEY, currentState);
 
             const victoryContainer = document.createElement('div');
             victoryContainer.className = 'victory-container';
@@ -466,7 +476,6 @@
             
             setTimeout(() => {
                 victoryContainer.remove();
-                hasShownVictory = false;
             }, 3000);
         }
 
