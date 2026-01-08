@@ -2,19 +2,7 @@
 const CONFIG = {
     STORAGE_KEYS: {
         TASKS: 'myTasks',
-        FREQUENT_TASKS: 'myFreqTasks',
-        COLORS: 'myColors'
-    },
-    DEFAULT_COLORS: {
-        '--bg-color': '#181818',
-        '--card-bg': '#292929',
-        '--text-primary': '#ffffff',
-        '--text-secondary': '#c4c4c4',
-        '--accent': '#e0e0e0',
-        '--accent-hover': '#a0a0a0',
-        '--optional': '#1ea319',
-        '--danger': '#d41e1e',
-        '--border': '#696969'
+        FREQUENT_TASKS: 'myFreqTasks'
     },
     DEFAULT_EMOJIS: {
         TASK: '📌',
@@ -45,15 +33,7 @@ const DOM = {
     freqList: document.getElementById('frequent-list'),
     freqEmojiTrigger: document.getElementById('freq-emoji-trigger'),
     freqEmojiPopover: document.getElementById('freq-emoji-popover'),
-    freqPicker: document.querySelector('#freq-emoji-popover emoji-picker'),
-    
-    // Paramètres
-    settingsBtn: document.getElementById('settings-btn'),
-    settingsModal: document.getElementById('settings-modal'),
-    closeSettings: document.getElementById('close-settings'),
-    resetColors: document.getElementById('reset-colors'),
-    saveColors: document.getElementById('save-colors'),
-    colorInputs: document.querySelectorAll('input[type="color"]')
+    freqPicker: document.querySelector('#freq-emoji-popover emoji-picker')
 };
 
 // === ÉTAT DE L'APPLICATION ===
@@ -65,7 +45,6 @@ const AppState = {
     
     init() {
         this.loadData();
-        this.loadColors();
     },
     
     loadData() {
@@ -75,7 +54,7 @@ const AppState = {
             { text: "Lecture", emoji: "📚" }
         ]);
         
-        // Migration des anciennes données
+        // Migration données anciennes
         if (this.frequentTasks.length > 0 && typeof this.frequentTasks[0] === 'string') {
             this.frequentTasks = this.frequentTasks.map(t => ({ 
                 text: t, 
@@ -90,7 +69,7 @@ const AppState = {
             const data = localStorage.getItem(key);
             return data ? JSON.parse(data) : defaultValue;
         } catch (error) {
-            console.error(`Erreur lors de la lecture de ${key}:`, error);
+            console.error(`Erreur lecture ${key}:`, error);
             return defaultValue;
         }
     },
@@ -100,45 +79,7 @@ const AppState = {
             localStorage.setItem(CONFIG.STORAGE_KEYS.TASKS, JSON.stringify(this.tasks));
             localStorage.setItem(CONFIG.STORAGE_KEYS.FREQUENT_TASKS, JSON.stringify(this.frequentTasks));
         } catch (error) {
-            console.error('Erreur lors de la sauvegarde:', error);
-        }
-    },
-    
-    loadColors() {
-        const savedColors = this.getFromStorage(CONFIG.STORAGE_KEYS.COLORS, null);
-        if (savedColors) {
-            Object.entries(savedColors).forEach(([key, value]) => {
-                document.documentElement.style.setProperty(key, value);
-            });
-        }
-    },
-    
-    saveColors() {
-        const colors = {};
-        DOM.colorInputs.forEach(input => {
-            const varName = input.dataset.var;
-            colors[varName] = input.value;
-            document.documentElement.style.setProperty(varName, input.value);
-        });
-        
-        try {
-            localStorage.setItem(CONFIG.STORAGE_KEYS.COLORS, JSON.stringify(colors));
-        } catch (error) {
-            console.error('Erreur lors de la sauvegarde des couleurs:', error);
-        }
-    },
-    
-    resetColors() {
-        Object.entries(CONFIG.DEFAULT_COLORS).forEach(([key, value]) => {
-            document.documentElement.style.setProperty(key, value);
-            const input = document.querySelector(`input[data-var="${key}"]`);
-            if (input) input.value = value;
-        });
-        
-        try {
-            localStorage.removeItem(CONFIG.STORAGE_KEYS.COLORS);
-        } catch (error) {
-            console.error('Erreur lors de la réinitialisation:', error);
+            console.error('Erreur sauvegarde:', error);
         }
     }
 };
@@ -207,7 +148,6 @@ class EmojiManager {
             }
         );
         
-        // Fermer les popovers au clic extérieur
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.input-wrapper')) {
                 this.closeAllPopovers();
@@ -216,21 +156,29 @@ class EmojiManager {
     }
 }
 
-// === GESTIONNAIRE DE DRAG & DROP ===
+// === GESTIONNAIRE DE DRAG & DROP (CORRECTIF ICI) ===
 class DragDropManager {
     static init() {
+        // Tâches
         Sortable.create(DOM.taskList, {
             animation: 150,
             ghostClass: 'sortable-ghost',
             delay: 100,
             delayOnTouchOnly: true,
             onEnd: (evt) => {
+                // Mise à jour du tableau
                 const item = AppState.tasks.splice(evt.oldIndex, 1)[0];
                 AppState.tasks.splice(evt.newIndex, 0, item);
                 AppState.save();
+                
+                // CRUCIAL: Re-rendre la liste pour mettre à jour les index des boutons
+                // Sinon le bouton supprimer de l'index 0 supprimera toujours l'élément visuel 0,
+                // même si c'est devenu une autre tâche.
+                TaskManager.render();
             }
         });
         
+        // Habitudes
         Sortable.create(DOM.freqList, {
             animation: 150,
             ghostClass: 'sortable-ghost',
@@ -240,6 +188,9 @@ class DragDropManager {
                 const item = AppState.frequentTasks.splice(evt.oldIndex, 1)[0];
                 AppState.frequentTasks.splice(evt.newIndex, 0, item);
                 AppState.save();
+                
+                // CRUCIAL: Re-rendre pour corriger les index
+                HabitManager.render();
             }
         });
     }
@@ -253,6 +204,8 @@ class TaskManager {
         AppState.tasks.forEach((task, index) => {
             const li = document.createElement('li');
             li.className = `task-item ${task.completed ? 'completed' : ''}`;
+            // Pas d'animation au chargement initial pour éviter l'effet "vague" sur toute la liste
+            // L'animation CSS est gérée par défaut, mais on pourrait la désactiver au load si voulu.
             
             li.innerHTML = `
                 <div class="task-content" data-index="${index}">
@@ -272,7 +225,7 @@ class TaskManager {
             
             content.addEventListener('click', () => this.toggleComplete(index));
             deleteBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-            deleteBtn.addEventListener('click', () => this.delete(index));
+            deleteBtn.addEventListener('click', (e) => this.delete(index, li)); // Passer l'élément DOM
             
             DOM.taskList.appendChild(li);
         });
@@ -290,9 +243,9 @@ class TaskManager {
         });
         
         AppState.save();
-        this.render();
+        this.render(); // Le nouvel élément aura l'animation CSS slideIn
         
-        // Reset du formulaire
+        // Reset
         DOM.taskInput.value = '';
         DOM.optionalCheck.checked = false;
         DOM.taskInput.focus();
@@ -306,34 +259,44 @@ class TaskManager {
         }
     }
     
-    static delete(index) {
-        AppState.tasks.splice(index, 1);
-        AppState.save();
-        this.render();
+    // Modification pour l'animation de suppression
+    static delete(index, domElement) {
+        // Ajouter la classe d'animation
+        domElement.classList.add('slide-out');
+        
+        // Attendre la fin de l'animation (300ms défini dans CSS)
+        setTimeout(() => {
+            AppState.tasks.splice(index, 1);
+            AppState.save();
+            this.render();
+        }, 300);
     }
     
     static clearAll() {
         if (AppState.tasks.length > 0 && Utils.showConfirm("Vider la liste du jour ?")) {
-            AppState.tasks = [];
-            AppState.save();
-            this.render();
+            // Animation sur tous les éléments
+            const items = document.querySelectorAll('.task-item');
+            items.forEach(item => item.classList.add('slide-out'));
+            
+            setTimeout(() => {
+                AppState.tasks = [];
+                AppState.save();
+                this.render();
+            }, 300);
         }
     }
     
     static init() {
-        // Bouton ajouter
         DOM.addBtn.addEventListener('click', () => {
             this.add(DOM.taskInput.value, DOM.optionalCheck.checked, AppState.currentTaskEmoji);
         });
         
-        // Touche Enter
         DOM.taskInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.add(DOM.taskInput.value, DOM.optionalCheck.checked, AppState.currentTaskEmoji);
             }
         });
         
-        // Bouton effacer tout
         DOM.clearBtn.addEventListener('click', () => this.clearAll());
     }
 }
@@ -355,13 +318,12 @@ class HabitManager {
                 <span class="freq-delete" data-index="${index}" aria-label="Supprimer">&times;</span>
             `;
             
-            // Event listeners
             const content = div.querySelector('.freq-content');
             const deleteBtn = div.querySelector('.freq-delete');
             
             content.addEventListener('click', () => this.addToTasks(index));
             deleteBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-            deleteBtn.addEventListener('click', () => this.delete(index));
+            deleteBtn.addEventListener('click', () => this.delete(index, div));
             
             DOM.freqList.appendChild(div);
         });
@@ -379,7 +341,6 @@ class HabitManager {
         AppState.save();
         this.render();
         
-        // Reset du formulaire
         DOM.freqInput.value = '';
         DOM.freqInput.focus();
     }
@@ -391,21 +352,23 @@ class HabitManager {
         }
     }
     
-    static delete(index) {
+    static delete(index, domElement) {
         if (Utils.showConfirm("Supprimer cette habitude ?")) {
-            AppState.frequentTasks.splice(index, 1);
-            AppState.save();
-            this.render();
+            domElement.classList.add('slide-out');
+            
+            setTimeout(() => {
+                AppState.frequentTasks.splice(index, 1);
+                AppState.save();
+                this.render();
+            }, 300);
         }
     }
     
     static init() {
-        // Bouton ajouter
         DOM.addFreqBtn.addEventListener('click', () => {
             this.add(DOM.freqInput.value, AppState.currentFreqEmoji);
         });
         
-        // Touche Enter
         DOM.freqInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.add(DOM.freqInput.value, AppState.currentFreqEmoji);
@@ -414,80 +377,18 @@ class HabitManager {
     }
 }
 
-// === GESTIONNAIRE DE PARAMÈTRES ===
-class SettingsManager {
-    static open() {
-        DOM.settingsModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-    
-    static close() {
-        DOM.settingsModal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-    
-    static init() {
-        // Charger les couleurs actuelles dans les inputs
-        DOM.colorInputs.forEach(input => {
-            const varName = input.dataset.var;
-            const currentValue = getComputedStyle(document.documentElement)
-                .getPropertyValue(varName).trim();
-            if (currentValue) {
-                input.value = currentValue;
-            }
-        });
-        
-        // Event listeners
-        DOM.settingsBtn.addEventListener('click', () => this.open());
-        DOM.closeSettings.addEventListener('click', () => this.close());
-        
-        DOM.settingsModal.addEventListener('click', (e) => {
-            if (e.target === DOM.settingsModal) {
-                this.close();
-            }
-        });
-        
-        DOM.saveColors.addEventListener('click', () => {
-            AppState.saveColors();
-            this.close();
-        });
-        
-        DOM.resetColors.addEventListener('click', () => {
-            if (Utils.showConfirm("Réinitialiser toutes les couleurs ?")) {
-                AppState.resetColors();
-            }
-        });
-        
-        // Fermer avec Échap
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !DOM.settingsModal.classList.contains('hidden')) {
-                this.close();
-            }
-        });
-    }
-}
-
-// === INITIALISATION DE L'APPLICATION ===
+// === INITIALISATION ===
 class App {
     static init() {
-        // Afficher la date
         DOM.dateDisplay.textContent = Utils.formatDate();
-        
-        // Initialiser l'état
         AppState.init();
-        
-        // Initialiser les gestionnaires
         EmojiManager.init();
         DragDropManager.init();
         TaskManager.init();
         HabitManager.init();
-        SettingsManager.init();
-        
-        // Rendu initial
         TaskManager.render();
         HabitManager.render();
     }
 }
 
-// Démarrer l'application
 document.addEventListener('DOMContentLoaded', () => App.init());
