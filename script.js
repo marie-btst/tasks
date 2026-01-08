@@ -54,7 +54,6 @@ const AppState = {
             { text: "Lecture", emoji: "📚" }
         ]);
         
-        // Migration données anciennes
         if (this.frequentTasks.length > 0 && typeof this.frequentTasks[0] === 'string') {
             this.frequentTasks = this.frequentTasks.map(t => ({ 
                 text: t, 
@@ -98,6 +97,8 @@ const Utils = {
     },
     
     showConfirm(message) {
+        // MODIF MOBILE : Vibration avant la confirm
+        if(navigator.vibrate) navigator.vibrate(20); 
         return confirm(message);
     }
 };
@@ -156,29 +157,24 @@ class EmojiManager {
     }
 }
 
-// === GESTIONNAIRE DE DRAG & DROP (CORRECTIF ICI) ===
+// === GESTIONNAIRE DE DRAG & DROP ===
 class DragDropManager {
     static init() {
-        // Tâches
         Sortable.create(DOM.taskList, {
             animation: 150,
             ghostClass: 'sortable-ghost',
             delay: 100,
             delayOnTouchOnly: true,
             onEnd: (evt) => {
-                // Mise à jour du tableau
                 const item = AppState.tasks.splice(evt.oldIndex, 1)[0];
                 AppState.tasks.splice(evt.newIndex, 0, item);
                 AppState.save();
-                
-                // CRUCIAL: Re-rendre la liste pour mettre à jour les index des boutons
-                // Sinon le bouton supprimer de l'index 0 supprimera toujours l'élément visuel 0,
-                // même si c'est devenu une autre tâche.
                 TaskManager.render();
+                // MODIF MOBILE : Vibration au lâcher
+                if(navigator.vibrate) navigator.vibrate(20);
             }
         });
         
-        // Habitudes
         Sortable.create(DOM.freqList, {
             animation: 150,
             ghostClass: 'sortable-ghost',
@@ -188,9 +184,8 @@ class DragDropManager {
                 const item = AppState.frequentTasks.splice(evt.oldIndex, 1)[0];
                 AppState.frequentTasks.splice(evt.newIndex, 0, item);
                 AppState.save();
-                
-                // CRUCIAL: Re-rendre pour corriger les index
                 HabitManager.render();
+                if(navigator.vibrate) navigator.vibrate(20);
             }
         });
     }
@@ -204,8 +199,6 @@ class TaskManager {
         AppState.tasks.forEach((task, index) => {
             const li = document.createElement('li');
             li.className = `task-item ${task.completed ? 'completed' : ''}`;
-            // Pas d'animation au chargement initial pour éviter l'effet "vague" sur toute la liste
-            // L'animation CSS est gérée par défaut, mais on pourrait la désactiver au load si voulu.
             
             li.innerHTML = `
                 <div class="task-content" data-index="${index}">
@@ -219,13 +212,12 @@ class TaskManager {
                 <button class="delete-btn" data-index="${index}" aria-label="Supprimer">&times;</button>
             `;
             
-            // Event listeners
             const content = li.querySelector('.task-content');
             const deleteBtn = li.querySelector('.delete-btn');
             
             content.addEventListener('click', () => this.toggleComplete(index));
             deleteBtn.addEventListener('mousedown', (e) => e.stopPropagation());
-            deleteBtn.addEventListener('click', (e) => this.delete(index, li)); // Passer l'élément DOM
+            deleteBtn.addEventListener('click', (e) => this.delete(index, li));
             
             DOM.taskList.appendChild(li);
         });
@@ -243,12 +235,23 @@ class TaskManager {
         });
         
         AppState.save();
-        this.render(); // Le nouvel élément aura l'animation CSS slideIn
+        this.render();
         
+        // MODIF MOBILE : Feedback vibration succès
+        if(navigator.vibrate) navigator.vibrate([30, 30, 30]);
+
         // Reset
         DOM.taskInput.value = '';
         DOM.optionalCheck.checked = false;
-        DOM.taskInput.focus();
+
+        // MODIF MOBILE CRUCIALE : 
+        // Si écran large (PC) => on remet le focus pour taper vite
+        // Si écran petit (Mobile) => on ferme le clavier pour voir la liste
+        if (window.innerWidth > 800) {
+            DOM.taskInput.focus();
+        } else {
+            DOM.taskInput.blur(); 
+        }
     }
     
     static toggleComplete(index) {
@@ -256,15 +259,17 @@ class TaskManager {
             AppState.tasks[index].completed = !AppState.tasks[index].completed;
             AppState.save();
             this.render();
+            // MODIF MOBILE : Petite vibration
+            if(navigator.vibrate) navigator.vibrate(15);
         }
     }
     
-    // Modification pour l'animation de suppression
     static delete(index, domElement) {
-        // Ajouter la classe d'animation
         domElement.classList.add('slide-out');
         
-        // Attendre la fin de l'animation (300ms défini dans CSS)
+        // MODIF MOBILE : Vibration
+        if(navigator.vibrate) navigator.vibrate(30);
+
         setTimeout(() => {
             AppState.tasks.splice(index, 1);
             AppState.save();
@@ -274,7 +279,6 @@ class TaskManager {
     
     static clearAll() {
         if (AppState.tasks.length > 0 && Utils.showConfirm("Vider la liste du jour ?")) {
-            // Animation sur tous les éléments
             const items = document.querySelectorAll('.task-item');
             items.forEach(item => item.classList.add('slide-out'));
             
@@ -342,7 +346,13 @@ class HabitManager {
         this.render();
         
         DOM.freqInput.value = '';
-        DOM.freqInput.focus();
+        
+        // MODIF MOBILE : Même logique, on ferme le clavier sur mobile
+        if (window.innerWidth > 800) {
+            DOM.freqInput.focus();
+        } else {
+            DOM.freqInput.blur();
+        }
     }
     
     static addToTasks(index) {
