@@ -50,8 +50,10 @@ const AppState = {
     loadData() {
         this.tasks = this.getFromStorage(CONFIG.STORAGE_KEYS.TASKS, []);
         this.frequentTasks = this.getFromStorage(CONFIG.STORAGE_KEYS.FREQUENT_TASKS, [
-            { text: "Sport", emoji: "🏋️" },
+            { text: "Sport", emoji: "📈" },
+            { text: "Running", emoji: "🏃" },
             { text: "Lecture", emoji: "📚" }
+
         ]);
         
         if (this.frequentTasks.length > 0 && typeof this.frequentTasks[0] === 'string') {
