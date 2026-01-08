@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <title>Planning</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="images/logo.ico">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 </head>
 <body>
     <div class="app-container">
         <header>
-            <h1>📋 Mon Planning</h1>
-            <p id="date-display"></p>
+            <div class="header-content">
+                <h1>📋 Mon Planning</h1>
+                <p id="date-display"></p>
+            </div>
+            <button id="theme-toggle" class="theme-btn" title="Changer le thème">🌙</button>
         </header>
 
         <div class="main-content">
@@ -54,6 +55,13 @@
                     <div class="input-group">
                         <button id="freq-emoji-trigger" class="emoji-btn" title="Emoji habitude">⭐</button>
                         <input type="text" id="frequent-input" placeholder="Nouvelle habitude..." autocomplete="off">
+                        
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="freq-optional-check">
+                            <span class="checkmark"></span>
+                            Facultatif
+                        </label>
+
                         <button id="add-frequent-btn">+</button>
                     </div>
 

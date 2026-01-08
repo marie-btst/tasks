@@ -2,7 +2,8 @@
 const CONFIG = {
     STORAGE_KEYS: {
         TASKS: 'myTasks',
-        FREQUENT_TASKS: 'myFreqTasks'
+        FREQUENT_TASKS: 'myFreqTasks',
+        THEME: 'theme'
     },
     DEFAULT_EMOJIS: {
         TASK: '📌',
@@ -10,25 +11,23 @@ const CONFIG = {
     }
 };
 
-// === SÉLECTION DU DOM ===
+// === DOM SELECTION ===
 const DOM = {
-    // Tâches
     taskInput: document.getElementById('task-input'),
     optionalCheck: document.getElementById('optional-check'),
     addBtn: document.getElementById('add-btn'),
     taskList: document.getElementById('task-list'),
     clearBtn: document.getElementById('clear-all'),
     
-    // Date
     dateDisplay: document.getElementById('date-display'),
+    themeToggle: document.getElementById('theme-toggle'),
     
-    // Emojis tâches
     emojiTrigger: document.getElementById('emoji-trigger'),
     emojiPopover: document.getElementById('emoji-popover'),
     mainPicker: document.querySelector('#emoji-popover emoji-picker'),
     
-    // Habitudes
     freqInput: document.getElementById('frequent-input'),
+    freqOptionalCheck: document.getElementById('freq-optional-check'),
     addFreqBtn: document.getElementById('add-frequent-btn'),
     freqList: document.getElementById('frequent-list'),
     freqEmojiTrigger: document.getElementById('freq-emoji-trigger'),
@@ -36,7 +35,7 @@ const DOM = {
     freqPicker: document.querySelector('#freq-emoji-popover emoji-picker')
 };
 
-// === ÉTAT DE L'APPLICATION ===
+// === APP STATE ===
 const AppState = {
     tasks: [],
     frequentTasks: [],
@@ -50,19 +49,9 @@ const AppState = {
     loadData() {
         this.tasks = this.getFromStorage(CONFIG.STORAGE_KEYS.TASKS, []);
         this.frequentTasks = this.getFromStorage(CONFIG.STORAGE_KEYS.FREQUENT_TASKS, [
-            { text: "Sport", emoji: "📈" },
-            { text: "Running", emoji: "🏃" },
-            { text: "Lecture", emoji: "📚" }
-
+            { text: "Sport", emoji: "📈", optional: false },
+            { text: "Lecture", emoji: "📚", optional: true }
         ]);
-        
-        if (this.frequentTasks.length > 0 && typeof this.frequentTasks[0] === 'string') {
-            this.frequentTasks = this.frequentTasks.map(t => ({ 
-                text: t, 
-                emoji: CONFIG.DEFAULT_EMOJIS.HABIT 
-            }));
-            this.save();
-        }
     },
     
     getFromStorage(key, defaultValue) {
@@ -70,7 +59,7 @@ const AppState = {
             const data = localStorage.getItem(key);
             return data ? JSON.parse(data) : defaultValue;
         } catch (error) {
-            console.error(`Erreur lecture ${key}:`, error);
+            console.error(`Error reading ${key}:`, error);
             return defaultValue;
         }
     },
@@ -80,12 +69,12 @@ const AppState = {
             localStorage.setItem(CONFIG.STORAGE_KEYS.TASKS, JSON.stringify(this.tasks));
             localStorage.setItem(CONFIG.STORAGE_KEYS.FREQUENT_TASKS, JSON.stringify(this.frequentTasks));
         } catch (error) {
-            console.error('Erreur sauvegarde:', error);
+            console.error('Save error:', error);
         }
     }
 };
 
-// === UTILITAIRES ===
+// === UTILS ===
 const Utils = {
     formatDate() {
         const options = { weekday: 'long', day: 'numeric', month: 'long' };
@@ -99,13 +88,42 @@ const Utils = {
     },
     
     showConfirm(message) {
-        // MODIF MOBILE : Vibration avant la confirm
         if(navigator.vibrate) navigator.vibrate(20); 
         return confirm(message);
     }
 };
 
-// === GESTIONNAIRE D'EMOJIS ===
+// === THEME MANAGER ===
+class ThemeManager {
+    static init() {
+        const currentTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME);
+        
+        if (currentTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            DOM.themeToggle.textContent = '☀️';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            DOM.themeToggle.textContent = '🌙';
+        }
+        
+        DOM.themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            
+            if (isLight) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, 'dark');
+                DOM.themeToggle.textContent = '🌙';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, 'light');
+                DOM.themeToggle.textContent = '☀️';
+            }
+            if(navigator.vibrate) navigator.vibrate(10);
+        });
+    }
+}
+
+// === EMOJI MANAGER ===
 class EmojiManager {
     static setupPicker(triggerBtn, popover, pickerElement, updateCallback) {
         triggerBtn.addEventListener('click', (e) => {
@@ -131,25 +149,15 @@ class EmojiManager {
     }
     
     static init() {
-        this.setupPicker(
-            DOM.emojiTrigger, 
-            DOM.emojiPopover, 
-            DOM.mainPicker, 
-            (emoji) => {
-                AppState.currentTaskEmoji = emoji;
-                DOM.taskInput.focus();
-            }
-        );
+        this.setupPicker(DOM.emojiTrigger, DOM.emojiPopover, DOM.mainPicker, (emoji) => {
+            AppState.currentTaskEmoji = emoji;
+            DOM.taskInput.focus();
+        });
         
-        this.setupPicker(
-            DOM.freqEmojiTrigger, 
-            DOM.freqEmojiPopover, 
-            DOM.freqPicker, 
-            (emoji) => {
-                AppState.currentFreqEmoji = emoji;
-                DOM.freqInput.focus();
-            }
-        );
+        this.setupPicker(DOM.freqEmojiTrigger, DOM.freqEmojiPopover, DOM.freqPicker, (emoji) => {
+            AppState.currentFreqEmoji = emoji;
+            DOM.freqInput.focus();
+        });
         
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.input-wrapper')) {
@@ -159,7 +167,7 @@ class EmojiManager {
     }
 }
 
-// === GESTIONNAIRE DE DRAG & DROP ===
+// === DRAG & DROP ===
 class DragDropManager {
     static init() {
         Sortable.create(DOM.taskList, {
@@ -172,7 +180,6 @@ class DragDropManager {
                 AppState.tasks.splice(evt.newIndex, 0, item);
                 AppState.save();
                 TaskManager.render();
-                // MODIF MOBILE : Vibration au lâcher
                 if(navigator.vibrate) navigator.vibrate(20);
             }
         });
@@ -193,7 +200,7 @@ class DragDropManager {
     }
 }
 
-// === GESTIONNAIRE DE TÂCHES ===
+// === TASK MANAGER ===
 class TaskManager {
     static render() {
         DOM.taskList.innerHTML = '';
@@ -204,9 +211,7 @@ class TaskManager {
             
             li.innerHTML = `
                 <div class="task-content" data-index="${index}">
-                    <div class="custom-checkbox">
-                        <i>✔</i>
-                    </div>
+                    <div class="custom-checkbox"><i>✔</i></div>
                     <span class="task-emoji">${Utils.sanitizeHTML(task.emoji || CONFIG.DEFAULT_EMOJIS.TASK)}</span>
                     <span class="task-text">${Utils.sanitizeHTML(task.text)}</span>
                     ${task.optional ? '<span class="badge-optional">Facultatif</span>' : ''}
@@ -239,21 +244,13 @@ class TaskManager {
         AppState.save();
         this.render();
         
-        // MODIF MOBILE : Feedback vibration succès
         if(navigator.vibrate) navigator.vibrate([30, 30, 30]);
 
-        // Reset
         DOM.taskInput.value = '';
         DOM.optionalCheck.checked = false;
 
-        // MODIF MOBILE CRUCIALE : 
-        // Si écran large (PC) => on remet le focus pour taper vite
-        // Si écran petit (Mobile) => on ferme le clavier pour voir la liste
-        if (window.innerWidth > 800) {
-            DOM.taskInput.focus();
-        } else {
-            DOM.taskInput.blur(); 
-        }
+        if (window.innerWidth > 800) DOM.taskInput.focus();
+        else DOM.taskInput.blur(); 
     }
     
     static toggleComplete(index) {
@@ -261,15 +258,12 @@ class TaskManager {
             AppState.tasks[index].completed = !AppState.tasks[index].completed;
             AppState.save();
             this.render();
-            // MODIF MOBILE : Petite vibration
             if(navigator.vibrate) navigator.vibrate(15);
         }
     }
     
     static delete(index, domElement) {
         domElement.classList.add('slide-out');
-        
-        // MODIF MOBILE : Vibration
         if(navigator.vibrate) navigator.vibrate(30);
 
         setTimeout(() => {
@@ -307,17 +301,17 @@ class TaskManager {
     }
 }
 
-// === GESTIONNAIRE D'HABITUDES ===
+// === HABIT MANAGER ===
 class HabitManager {
     static render() {
         DOM.freqList.innerHTML = '';
         
         AppState.frequentTasks.forEach((item, index) => {
             const div = document.createElement('div');
-            div.className = 'freq-tag';
+            div.className = `freq-tag ${item.optional ? 'optional' : ''}`;
             
             div.innerHTML = `
-                <div class="freq-content" data-index="${index}">
+                <div class="freq-content" style="display:flex; align-items:center; gap:8px;">
                     <span>${Utils.sanitizeHTML(item.emoji)}</span>
                     <span>${Utils.sanitizeHTML(item.text)}</span>
                 </div>
@@ -335,39 +329,36 @@ class HabitManager {
         });
     }
     
-    static add(text, emoji) {
+    static add(text, emoji, isOptional) {
         const trimmedText = text.trim();
         if (!trimmedText) return;
         
         AppState.frequentTasks.push({
             text: trimmedText,
-            emoji: emoji
+            emoji: emoji,
+            optional: isOptional
         });
         
         AppState.save();
         this.render();
         
         DOM.freqInput.value = '';
+        DOM.freqOptionalCheck.checked = false;
         
-        // MODIF MOBILE : Même logique, on ferme le clavier sur mobile
-        if (window.innerWidth > 800) {
-            DOM.freqInput.focus();
-        } else {
-            DOM.freqInput.blur();
-        }
+        if (window.innerWidth > 800) DOM.freqInput.focus();
+        else DOM.freqInput.blur();
     }
     
     static addToTasks(index) {
         const habit = AppState.frequentTasks[index];
         if (habit) {
-            TaskManager.add(habit.text, false, habit.emoji);
+            TaskManager.add(habit.text, habit.optional || false, habit.emoji);
         }
     }
     
     static delete(index, domElement) {
         if (Utils.showConfirm("Supprimer cette habitude ?")) {
             domElement.classList.add('slide-out');
-            
             setTimeout(() => {
                 AppState.frequentTasks.splice(index, 1);
                 AppState.save();
@@ -378,22 +369,23 @@ class HabitManager {
     
     static init() {
         DOM.addFreqBtn.addEventListener('click', () => {
-            this.add(DOM.freqInput.value, AppState.currentFreqEmoji);
+            this.add(DOM.freqInput.value, AppState.currentFreqEmoji, DOM.freqOptionalCheck.checked);
         });
         
         DOM.freqInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                this.add(DOM.freqInput.value, AppState.currentFreqEmoji);
+                this.add(DOM.freqInput.value, AppState.currentFreqEmoji, DOM.freqOptionalCheck.checked);
             }
         });
     }
 }
 
-// === INITIALISATION ===
+// === INIT ===
 class App {
     static init() {
         DOM.dateDisplay.textContent = Utils.formatDate();
         AppState.init();
+        ThemeManager.init();
         EmojiManager.init();
         DragDropManager.init();
         TaskManager.init();
