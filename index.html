@@ -3,167 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Application de gestion de tâches avec priorités et catégories personnalisables">
-    <title>Tâches</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="images/logo.ico" type="image/logo">
+    <title>Planning Triable & Emojis</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="images/logo.ico" type="image/x-icon">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <div class="logo">📋 Tâches</div>
-            <div class="header-controls">
-                <div class="view-toggle">
-                    <button class="view-btn active" data-view="list">📝 Liste</button>
-                    <button class="view-btn" data-view="today">📅 Aujourd'hui</button>
+    <div class="app-container">
+        <!-- Bouton paramètres -->
+        <button id="settings-btn" class="settings-btn" title="Paramètres" aria-label="Ouvrir les paramètres">
+            ⚙️
+        </button>
+
+        <!-- Modal paramètres -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🎨 Personnalisation des couleurs</h2>
+                    <button id="close-settings" class="close-btn" aria-label="Fermer">&times;</button>
                 </div>
-                <button class="theme-toggle" title="Changer le thème">🌙</button>
+                <div class="modal-body">
+                    <div class="color-grid">
+                        <div class="color-item">
+                            <label for="bg-color">Fond de la page</label>
+                            <input type="color" id="bg-color" data-var="--bg-color" value="#181818">
+                        </div>
+                        <div class="color-item">
+                            <label for="card-bg">Fond des cartes</label>
+                            <input type="color" id="card-bg" data-var="--card-bg" value="#292929">
+                        </div>
+                        <div class="color-item">
+                            <label for="text-primary">Texte principal</label>
+                            <input type="color" id="text-primary" data-var="--text-primary" value="#ffffff">
+                        </div>
+                        <div class="color-item">
+                            <label for="text-secondary">Texte secondaire</label>
+                            <input type="color" id="text-secondary" data-var="--text-secondary" value="#c4c4c4">
+                        </div>
+                        <div class="color-item">
+                            <label for="accent">Accent</label>
+                            <input type="color" id="accent" data-var="--accent" value="#e0e0e0">
+                        </div>
+                        <div class="color-item">
+                            <label for="accent-hover">Accent hover</label>
+                            <input type="color" id="accent-hover" data-var="--accent-hover" value="#a0a0a0">
+                        </div>
+                        <div class="color-item">
+                            <label for="optional">Badge facultatif</label>
+                            <input type="color" id="optional" data-var="--optional" value="#1ea319">
+                        </div>
+                        <div class="color-item">
+                            <label for="danger">Danger</label>
+                            <input type="color" id="danger" data-var="--danger" value="#d41e1e">
+                        </div>
+                        <div class="color-item">
+                            <label for="border">Bordures</label>
+                            <input type="color" id="border" data-var="--border" value="#696969">
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="reset-colors" class="secondary-btn">Réinitialiser</button>
+                        <button id="save-colors" class="primary-btn">Sauvegarder</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="container">
-        <div class="main-grid">
-            <!-- Sidebar gauche -->
-            <aside class="sidebar">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalTasks">0</div>
-                        <div class="stat-label">Total</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="completedTasks">0</div>
-                        <div class="stat-label">Terminées</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="todayTasks">0</div>
-                        <div class="stat-label">Aujourd'hui</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="overdueTasks">0</div>
-                        <div class="stat-label">En retard</div>
-                    </div>
-                </div>
+        <header>
+            <h1>📋 Mon Planning</h1>
+            <p id="date-display"></p>
+        </header>
 
-                <div class="filter-group">
-                    <h3>🎯 Priorités</h3>
-                    <button class="filter-btn active" data-filter="all">Toutes</button>
-                    <button class="filter-btn" data-filter="high">🔴 Haute</button>
-                    <button class="filter-btn" data-filter="medium">🟡 Moyenne</button>
-                    <button class="filter-btn" data-filter="low">🔵 Basse</button>
-                </div>
-
-                <div class="filter-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h3>📁 Catégories</h3>
-                        <button class="icon-btn-small" id="addCategoryBtn" title="Ajouter une catégorie">➕</button>
+        <div class="main-content">
+            <!-- Section Tâches -->
+            <section class="daily-section">
+                <h2>Tâches du jour</h2>
+                
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <button id="emoji-trigger" class="emoji-btn" title="Emoji tâche" aria-label="Choisir un emoji">📌</button>
+                        <input type="text" id="task-input" placeholder="Ajouter une tâche..." autocomplete="off" aria-label="Nouvelle tâche">
+                        
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="optional-check">
+                            <span class="checkmark"></span>
+                            Facultatif
+                        </label>
+                        
+                        <button id="add-btn">Ajouter</button>
                     </div>
-                    <div id="categoryList">
-                        <button class="category-btn active" data-category="all">Toutes</button>
+
+                    <div id="emoji-popover" class="hidden popover">
+                        <emoji-picker class="dark"></emoji-picker>
                     </div>
                 </div>
-            </aside>
 
-            <!-- Contenu principal -->
-            <main class="main-content">
-                <input type="text" id="searchBar" class="search-bar" placeholder="🔍 Rechercher une tâche...">
+                <ul id="task-list"></ul>
+                
+                <button id="clear-all" class="danger-btn">Tout effacer</button>
+            </section>
 
-                <div class="task-input-group">
-                    <input type="text" id="taskInput" class="task-input" placeholder="Nouvelle tâche...">
-                    <select id="prioritySelect" class="select-input">
-                        <option value="low">🔵 Basse</option>
-                        <option value="medium">🟡 Moyenne</option>
-                        <option value="high">🔴 Haute</option>
-                    </select>
-                    <select id="categorySelect" class="select-input">
-                        <!-- Rempli dynamiquement -->
-                    </select>
-                    <input type="date" id="dueDateInput" class="select-input">
-                    <button id="addTaskBtn" class="add-btn">+ Ajouter</button>
-                </div>
+            <!-- Section Habitudes -->
+            <section class="frequent-section">
+                <h2>🔁 Habitudes</h2>
+                
+                <div class="input-wrapper">
+                    <div class="input-group">
+                        <button id="freq-emoji-trigger" class="emoji-btn" title="Emoji habitude" aria-label="Choisir un emoji">⭐</button>
+                        <input type="text" id="frequent-input" placeholder="Nouvelle habitude..." aria-label="Nouvelle habitude">
+                        <button id="add-frequent-btn">+</button>
+                    </div>
 
-                <div id="listView">
-                    <ul id="taskList" class="task-list"></ul>
-                    <div id="emptyState" class="empty-state" style="display: none;">
-                        <div class="empty-state-icon">✨</div>
-                        <h2>Aucune tâche</h2>
-                        <p>Commencez par ajouter votre première tâche !</p>
+                    <div id="freq-emoji-popover" class="hidden popover">
+                        <emoji-picker class="dark" id="freq-picker"></emoji-picker>
                     </div>
                 </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Modal pour édition détaillée -->
-    <div id="taskModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>✏️ Éditer la tâche</h2>
-                <button class="close-modal">✕</button>
-            </div>
-            <div class="form-group">
-                <label>Titre</label>
-                <input type="text" id="modalTaskTitle">
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea id="modalTaskDesc" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Priorité</label>
-                <select id="modalPriority">
-                    <option value="low">🔵 Basse</option>
-                    <option value="medium">🟡 Moyenne</option>
-                    <option value="high">🔴 Haute</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Catégorie</label>
-                <select id="modalCategory">
-                    <!-- Rempli dynamiquement -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Date limite</label>
-                <input type="date" id="modalDueDate">
-            </div>
-            <div class="form-group">
-                <label>Temps estimé (minutes)</label>
-                <input type="number" id="modalEstimatedTime" min="5" step="5">
-            </div>
-            <div class="form-group">
-                <label>Récurrence</label>
-                <select id="modalRecurrence">
-                    <option value="none">Aucune</option>
-                    <option value="daily">Quotidienne</option>
-                    <option value="weekly">Hebdomadaire</option>
-                    <option value="monthly">Mensuelle</option>
-                </select>
-            </div>
-            <button class="add-btn" id="saveTaskBtn">💾 Enregistrer</button>
-        </div>
-    </div>
-
-    <!-- Modal pour ajouter une catégorie -->
-    <div id="categoryModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>➕ Nouvelle catégorie</h2>
-                <button class="close-modal" id="closeCategoryModal">✕</button>
-            </div>
-            <div class="form-group">
-                <label>Nom de la catégorie</label>
-                <input type="text" id="newCategoryName" placeholder="Ex: Sport, Études...">
-            </div>
-            <div class="form-group">
-                <label>Icône (emoji)</label>
-                <input type="text" id="newCategoryIcon" placeholder="Ex: 🎯, 📚, 🏃..." maxlength="2">
-            </div>
-            <button class="add-btn" id="saveCategoryBtn">💾 Ajouter</button>
+                
+                <div id="frequent-list" class="tags-container"></div>
+                <p class="small-text">Glisse pour trier • Clique pour ajouter</p>
+            </section>
         </div>
     </div>
 
